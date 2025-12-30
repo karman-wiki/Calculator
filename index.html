@@ -39,10 +39,7 @@
             border-radius: 28px;
             border: 1px solid var(--border-glow);
             box-shadow: 0 25px 60px rgba(0,0,0,0.9);
-            animation: fadeIn 0.5s ease-out;
         }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         h1 { text-align: center; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; margin: 0 0 5px 0; }
         .credit { text-align: center; font-size: 0.8rem; color: #8b7d6b; margin-bottom: 25px; letter-spacing: 1px; }
@@ -67,10 +64,9 @@
         .share-btn {
             width: 100%; padding: 14px; background: var(--btn-secondary); border: 1px solid var(--border-glow);
             border-radius: 12px; font-weight: 700; cursor: pointer; color: var(--text-main);
-            margin-top: 20px; transition: background 0.2s;
+            margin-top: 20px;
         }
 
-        .share-btn:hover { background: #3a2a1c; }
         .hidden { display: none; }
     </style>
 </head>
@@ -87,7 +83,7 @@
         <option value="eff">Shaking Efficiency (R)</option>
         <option value="macro">Autopan/Macro Efficiency</option>
         <option value="opt">Optimal Capacity (Active)</option>
-        <option value="opt_macro">Optimal Capacity (Macro)</option>
+        <option value="opt_macro" selected>Optimal Capacity (Macro)</option>
     </select>
 
     <div id="luck-group">
@@ -101,14 +97,14 @@
     </div>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div><span class="section-label">Shake Spd</span><input type="number" id="s" value="744" oninput="calculate()"></div>
-        <div><span class="section-label">Shake Str</span><input type="number" id="a" value="1476" oninput="calculate()"></div>
+        <div><span class="section-label">Shake Spd (s)</span><input type="number" id="s" value="744" oninput="calculate()"></div>
+        <div><span class="section-label">Shake Str (a)</span><input type="number" id="a" value="1476" oninput="calculate()"></div>
     </div>
 
-    <div id="macro-group" class="hidden">
+    <div id="macro-group">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div><span class="section-label">Digs To Fill</span><input type="number" id="n" value="15" oninput="calculate()"></div>
-            <div><span class="section-label">Dig Speed</span><input type="number" id="d" value="440" oninput="calculate()"></div>
+            <div><span class="section-label">Digs (n)</span><input type="number" id="n" value="15" oninput="calculate()"></div>
+            <div><span class="section-label">Dig Speed (d)</span><input type="number" id="d" value="440" oninput="calculate()"></div>
         </div>
     </div>
 
@@ -128,13 +124,19 @@
     function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="rgba(255,204,51,0.2)"; particles.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,1.2,0,7); ctx.fill(); p.y-=p.s; if(p.y<-5) p.y=canvas.height; }); requestAnimationFrame(anim); }
     window.onresize = init; init(); anim();
 
-    let lastRPS = 0;
+    let lastMainVal = 0;
 
     function updateUI() {
         const type = document.getElementById('calcType').value;
-        document.getElementById('luck-group').classList.toggle('hidden', type.startsWith('opt'));
-        document.getElementById('cap-group').classList.toggle('hidden', type.startsWith('opt'));
-        document.getElementById('macro-group').classList.toggle('hidden', type !== 'macro' && type !== 'opt_macro');
+        const isOpt = type.startsWith('opt');
+        
+        document.getElementById('luck-group').classList.toggle('hidden', isOpt);
+        document.getElementById('cap-group').classList.toggle('hidden', isOpt);
+        
+        // Dig stats required for Macro Efficiency OR Optimal Macro Capacity
+        const needsDig = (type === 'macro' || type === 'opt_macro');
+        document.getElementById('macro-group').classList.toggle('hidden', !needsDig);
+        
         calculate();
     }
 
@@ -153,19 +155,19 @@
         if(type === 'eff') res = (L * Math.sqrt(C)) / (penalty + 2.5);
         else if(type === 'macro') res = (L * Math.sqrt(C)) / (penalty + 3 + (190 * n / d));
         else if(type === 'opt') res = (7.5 * s * a) / 100;
-        else if(type === 'opt_macro') res = (0.09 * s * a) + (5.7 * s * a * n / d);
+        else if(type === 'opt_macro') res = (0.09 * s * a) + ((5.7 * s * a * n) / d);
 
-        lastRPS = Math.round(res);
+        lastMainVal = Math.round(res);
         
         if (type.startsWith('opt')) {
             document.getElementById('res-title').innerText = "Optimal Capacity Target";
-            document.getElementById('res-value').innerText = lastRPS.toLocaleString();
+            document.getElementById('res-value').innerText = lastMainVal.toLocaleString();
             document.getElementById('res-min').classList.add('hidden');
         } else {
             document.getElementById('res-title').innerText = "Rerolls Per Second";
-            document.getElementById('res-value').innerText = lastRPS.toLocaleString();
+            document.getElementById('res-value').innerText = lastMainVal.toLocaleString();
             document.getElementById('res-min').classList.remove('hidden');
-            document.getElementById('res-min').innerText = (lastRPS * 60).toLocaleString() + " Per Minute";
+            document.getElementById('res-min').innerText = (lastMainVal * 60).toLocaleString() + " Per Minute";
         }
     }
 
@@ -179,8 +181,12 @@
         const type = document.getElementById('calcType').options[document.getElementById('calcType').selectedIndex].text;
 
         let msg = `[${type}]\n`;
-        msg += `Rerolls/Sec: ${lastRPS.toLocaleString()}\n`;
-        msg += `Rerolls/Min: ${(lastRPS * 60).toLocaleString()}\n`;
+        if (document.getElementById('calcType').value.startsWith('opt')) {
+            msg += `Optimal Target: ${lastMainVal.toLocaleString()}\n`;
+        } else {
+            msg += `Rerolls/Sec: ${lastMainVal.toLocaleString()}\n`;
+            msg += `Rerolls/Min: ${(lastMainVal * 60).toLocaleString()}\n`;
+        }
         msg += `Stats: Luck ${L} | Cap ${C} | Spd ${s}% | Str ${a}`;
         if(document.getElementById('calcType').value.includes('macro')) msg += ` | Digs ${n} | D.Spd ${d}`;
         
