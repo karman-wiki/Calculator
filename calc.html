@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospecting Formula Calculator</title>
+    <style>
+        :root {
+            --bg-dark: #0f0b08;
+            --panel-bg: rgba(30, 20, 15, 0.9);
+            --accent-gold: #ffcc33;
+            --accent-glow: rgba(255, 204, 51, 0.4);
+            --text-main: #fcf8f2;
+            --input-bg: #080605;
+            --border-glow: #4d3319;
+            --btn-secondary: #2a1e14;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 0;
+            overflow-x: hidden;
+        }
+
+        #canvas-bg { position: fixed; top: 0; left: 0; z-index: -1; }
+
+        .wrapper {
+            display: flex;
+            gap: 25px;
+            max-width: 1000px;
+            width: 95%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .container, .leaderboard {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            padding: 35px;
+            border-radius: 28px;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+        }
+
+        .container { flex: 1; min-width: 320px; max-width: 550px; }
+        .leaderboard { width: 300px; border-color: rgba(255, 204, 51, 0.15); }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0;
+        }
+
+        h2 { font-size: 1.1rem; margin-bottom: 25px; color: #8b7d6b; }
+
+        .credit { text-align: center; font-size: 0.8rem; color: #8b7d6b; margin-bottom: 25px; letter-spacing: 1px; font-weight: 600; }
+
+        .section-label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 6px; text-transform: uppercase; opacity: 0.8; }
+
+        select, input {
+            width: 100%; padding: 14px; margin-bottom: 18px;
+            background: var(--input-bg); border: 1px solid #332211;
+            color: #fff; border-radius: 12px; box-sizing: border-box;
+            font-size: 1rem; transition: border 0.2s;
+        }
+
+        .toggle-container {
+            display: flex;
+            background: var(--input-bg);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 4px;
+            border: 1px solid #332211;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: none;
+            color: #8b7d6b;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .result-panel {
+            background: #000; padding: 25px; border-radius: 20px; text-align: center;
+            border-top: 3px solid var(--accent-gold); margin-top: 10px;
+        }
+
+        .res-value { font-size: 2.5rem; font-weight: 900; color: var(--accent-gold); display: block; margin-bottom: 15px; }
+
+        .btn-group { display: flex; gap: 10px; flex-direction: column; }
+
+        .save-btn {
+            padding: 14px; background: var(--accent-gold); border: none; border-radius: 12px;
+            font-weight: 800; cursor: pointer; color: #000; text-transform: uppercase;
+        }
+
+        .share-btn {
+            padding: 12px; background: var(--btn-secondary); border: 1px solid var(--border-glow);
+            border-radius: 12px; font-weight: 600; cursor: pointer; color: var(--text-main);
+        }
+
+        .lb-list { list-style: none; padding: 0; margin: 0; }
+        .lb-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 10px; border-bottom: 1px solid #221812; font-size: 0.95rem;
+        }
+        .lb-rank { color: var(--accent-gold); font-weight: 900; width: 35px; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<div class="wrapper">
+    <div class="container">
+        <h1>Prospecting Calc</h1>
+        <div class="credit">FORMULAS BY AUTUMN</div>
+
+        <span class="section-label">Time Unit</span>
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="secToggle" onclick="setTimeUnit('sec')">PER SECOND</button>
+            <button class="toggle-btn" id="minToggle" onclick="setTimeUnit('min')">PER MINUTE</button>
+        </div>
+
+        <span class="section-label">Mode</span>
+        <select id="calcType" onchange="updateUI()">
+            <option value="eff">Shaking Efficiency (R)</option>
+            <option value="macro">Autopan/Macro Efficiency</option>
+            <option value="opt">Optimal Capacity (Active)</option>
+            <option value="opt_macro">Optimal Capacity (Macro)</option>
+        </select>
+
+        <div id="luck-group">
+            <span class="section-label">Luck</span>
+            <input type="number" id="L" value="46121" oninput="calculate()">
+        </div>
+        
+        <div id="cap-group">
+            <span class="section-label">Capacity</span>
+            <input type="number" id="C" value="11812" oninput="calculate()">
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div><span class="section-label">Shake Spd</span><input type="number" id="s" value="744" oninput="calculate()"></div>
+            <div><span class="section-label">Shake Str</span><input type="number" id="a" value="1476" oninput="calculate()"></div>
+        </div>
+
+        <div id="macro-group" class="hidden">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div><span class="section-label">Digs</span><input type="number" id="n" value="15" oninput="calculate()"></div>
+                <div><span class="section-label">Dig Spd</span><input type="number" id="d" value="440" oninput="calculate()"></div>
+            </div>
+        </div>
+
+        <div class="result-panel">
+            <span class="section-label" id="res-label-title">Rerolls Per Second</span>
+            <span class="res-value" id="res-value">0</span>
+            <div class="btn-group">
+                <button class="save-btn" onclick="saveToLeaderboard()">Record PB</button>
+                <button class="share-btn" onclick="shareBuild()">📋 Copy Build Stats</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="leaderboard">
+        <h2>Personal Bests</h2>
+        <ul class="lb-list" id="lb-list"></ul>
+        <button onclick="clearLB()" style="background:none; border:none; color:#555; cursor:pointer; width:100%; margin-top:20px; font-size:0.7rem;">RESET BOARD</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function init() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; for(let i=0; i<60; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*0.4+0.1}); }
+    function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="rgba(255,204,51,0.2)"; particles.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,1.2,0,7); ctx.fill(); p.y-=p.s; if(p.y<-5) p.y=canvas.height; }); requestAnimationFrame(anim); }
+    window.onresize = init; init(); anim();
+
+    let currentScore = 0;
+    let timeUnit = 'sec';
+
+    function setTimeUnit(unit) {
+        timeUnit = unit;
+        document.getElementById('secToggle').classList.toggle('active', unit === 'sec');
+        document.getElementById('minToggle').classList.toggle('active', unit === 'min');
+        calculate();
+    }
+
+    function updateUI() {
+        const type = document.getElementById('calcType').value;
+        document.getElementById('luck-group').classList.toggle('hidden', type.startsWith('opt'));
+        document.getElementById('cap-group').classList.toggle('hidden', type.startsWith('opt'));
+        document.getElementById('macro-group').classList.toggle('hidden', type !== 'macro' && type !== 'opt_macro');
+        calculate();
+    }
+
+    function calculate() {
+        const L = parseFloat(document.getElementById('L').value) || 0;
+        const C = parseFloat(document.getElementById('C').value) || 0;
+        const s = parseFloat(document.getElementById('s').value) || 0;
+        const a = parseFloat(document.getElementById('a').value) || 0;
+        const n = parseFloat(document.getElementById('n').value) || 0;
+        const d = parseFloat(document.getElementById('d').value) || 0;
+        const type = document.getElementById('calcType').value;
+
+        let res = 0;
+        const penalty = (100 * C) / (3 * s * a);
+
+        if(type === 'eff') res = (L * Math.sqrt(C)) / (penalty + 2.5);
+        else if(type === 'macro') res = (L * Math.sqrt(C)) / (penalty + 3 + (190 * n / d));
+        else if(type === 'opt') res = (7.5 * s * a) / 100;
+        else if(type === 'opt_macro') res = (0.09 * s * a) + (5.7 * s * a * n / d);
+
+        if (!type.startsWith('opt') && timeUnit === 'min') res *= 60;
+        
+        currentScore = Math.round(res);
+        document.getElementById('res-value').innerText = currentScore.toLocaleString();
+        document.getElementById('res-label-title').innerText = type.startsWith('opt') ? "Optimal Capacity Target" : `Rerolls Per ${timeUnit === 'sec' ? 'Second' : 'Minute'}`;
+    }
+
+    function shareBuild() {
+        const text = `🏆 Prospecting Build\nScore: ${currentScore.toLocaleString()} (Per ${timeUnit})\nFormulas by Autumn`;
+        navigator.clipboard.writeText(text).then(() => alert("Build copied!"));
+    }
+
+    function saveToLeaderboard() {
+        const checkVal = timeUnit === 'min' ? currentScore / 60 : currentScore;
+        if (checkVal > 10000000) return alert("Score exceeds 10M limit.");
+        let list = JSON.parse(localStorage.getItem('prospectingLB') || '[]');
+        list.push(currentScore);
+        list.sort((a,b) => b-a);
+        localStorage.setItem('prospectingLB', JSON.stringify(list.slice(0, 10)));
+        displayLB();
+    }
+
+    function displayLB() {
+        const list = JSON.parse(localStorage.getItem('prospectingLB') || '[]');
+        document.getElementById('lb-list').innerHTML = list.map((s, i) => `<li class="lb-item"><span class="lb-rank">#${i+1}</span><span>${s.toLocaleString()}</span></li>`).join('');
+    }
+
+    function clearLB() { localStorage.removeItem('prospectingLB'); displayLB(); }
+    updateUI();
+    displayLB();
+</script>
+</body>
+</html>
