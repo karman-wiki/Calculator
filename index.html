@@ -3,169 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prospecting! Master Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <title>Prospecting! Calculator</title>
     <style>
         :root {
-            --bg: #0b0e14;
-            --panel: #161b22;
-            --accent: #00f2ff;
-            --text: #e6edf3;
-            --success: #39ff14;
-            --buff: #ff007b;
-            --gold: #ffca28;
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --buff: #db2777;
         }
 
         body {
-            font-family: 'Rajdhani', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
+            line-height: 1.5;
             display: flex;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
             padding: 20px;
+            margin: 0;
         }
 
-        .calc-card {
-            background: var(--panel);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid var(--accent);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
+        .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
+            background: var(--card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; text-align: center; margin-bottom: 1.5rem; }
-        .highlight { color: var(--accent); font-weight: 700; }
-
-        .section-label {
-            font-family: 'Orbitron';
-            font-size: 0.7rem;
-            color: var(--accent);
-            margin: 1rem 0 0.5rem 0;
-            display: block;
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 5px;
-        }
-
-        .equip-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-
-        .toggle-btn {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
+        h1 { text-align: center; margin-top: 0; font-size: 24px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        
+        .mode-selector {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            transition: 0.3s;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .toggle-btn.active { border-color: var(--buff); background: rgba(255, 0, 123, 0.1); }
-        .toggle-btn.gold { border-color: var(--gold); background: rgba(255, 202, 40, 0.1); }
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            background: #f1f5f9;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .section {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: block;
+            color: #64748b;
+            text-transform: uppercase;
+        }
 
         .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 1rem;
+            gap: 15px;
         }
 
-        .input-row { display: flex; flex-direction: column; }
-        label { font-size: 0.7rem; margin-bottom: 0.2rem; color: #8b949e; text-transform: uppercase; }
+        .field { display: flex; flex-direction: column; }
+        label { font-size: 13px; margin-bottom: 4px; font-weight: 500; }
         input {
-            background: #0d1117; border: 1px solid #30363d; padding: 10px;
-            border-radius: 6px; color: var(--accent); font-family: 'Orbitron'; font-size: 0.9rem;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 16px;
         }
 
-        .results-panel {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: #0d1117;
-            border-radius: 10px;
-            border: 1px solid var(--success);
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
         }
 
-        .main-score { font-family: 'Orbitron'; font-size: 2.4rem; color: var(--success); display: block; text-align: center;}
-        .sub-stat { display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px solid #222; padding: 4px 0; }
-        .val { color: var(--accent); font-weight: bold; }
+        .check-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+
+        .result-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .main-result {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--success);
+            display: block;
+        }
+
+        .sub-result {
+            font-size: 14px;
+            color: #166534;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
-<div class="calc-card">
-    <h1><span class="highlight">PROSPECTING!</span> CALCULATOR</h1>
-    
-    <span class="section-label">XMAS EQUIPMENT</span>
-    <div class="equip-grid">
-        <div id="btnShovel" class="toggle-btn" onclick="toggleEquip('shovel')">
-            <span>Shovel Only</span>
-            <input type="checkbox" id="checkShovel" style="display:none">
+<div class="container">
+    <h1><strong>Prospecting!</strong> Calculator</h1>
+
+    <label class="section-title">Calculation Mode</label>
+    <div class="mode-selector">
+        <button id="modeQuick" class="mode-btn active" onclick="setMode('quick')">Standard Efficiency</button>
+        <button id="modeFull" class="mode-btn" onclick="setMode('full')">Cookie Buff Strategy</button>
+    </div>
+
+    <div id="strategyOptions" style="display:none;">
+        <div class="section">
+            <span class="section-title">Equipment Configuration</span>
+            <div class="checkbox-group">
+                <label class="check-item"><input type="radio" name="equip" id="equipNone" checked onchange="calculate()"> No Buff Equip</label>
+                <label class="check-item"><input type="radio" name="equip" id="equipShovel" onchange="calculate()"> Shovel Only (180s Cooldown)</label>
+                <label class="check-item"><input type="radio" name="equip" id="equipBoth" onchange="calculate()"> Shovel + Pan (90s Cooldown)</label>
+                <label class="check-item"><input type="checkbox" id="hasBag" onchange="calculate()"> Santa's Bag (60s Duration)</label>
+            </div>
         </div>
-        <div id="btnBoth" class="toggle-btn" onclick="toggleEquip('both')">
-            <span>Shovel + Pan</span>
-            <input type="checkbox" id="checkBoth" style="display:none">
-        </div>
-        <div id="btnBag" class="toggle-btn" onclick="toggleEquip('bag')" style="grid-column: span 2;">
-            <span>Santa's Bag (2x Duration)</span>
-            <input type="checkbox" id="checkBag" style="display:none">
+
+        <div class="section" style="background: #fdf2f8; border-color: #fbcfe8;">
+            <span class="section-title" style="color: #be185d;">Base Stats (Brackets)</span>
+            <div class="input-grid">
+                <div class="field"><label>Base Luck</label><input type="number" id="baseL" value="0" oninput="calculate()"></div>
+                <div class="field"><label>Base Cap</label><input type="number" id="baseC" value="0" oninput="calculate()"></div>
+                <div class="field"><label>Base Spd %</label><input type="number" id="baseSPD" value="0" oninput="calculate()"></div>
+                <div class="field"><label>Base Str</label><input type="number" id="baseS" value="0" oninput="calculate()"></div>
+            </div>
         </div>
     </div>
 
-    <span class="section-label">BASE STATS (BRACKETS)</span>
-    <div class="input-grid">
-        <div class="input-row"><label>Base Luck</label><input type="number" id="baseL" value="0" oninput="calculate()"></div>
-        <div class="input-row"><label>Base Cap</label><input type="number" id="baseC" value="0" oninput="calculate()"></div>
-        <div class="input-row"><label>Base Spd %</label><input type="number" id="baseSPD" value="0" oninput="calculate()"></div>
-        <div class="input-row"><label>Base Str</label><input type="number" id="baseS" value="0" oninput="calculate()"></div>
+    <div class="section">
+        <span class="section-title">Current Total Stats</span>
+        <div class="input-grid">
+            <div class="field"><label>Total Luck</label><input type="number" id="L" placeholder="0" oninput="calculate()"></div>
+            <div class="field"><label>Total Cap</label><input type="number" id="C" placeholder="0" oninput="calculate()"></div>
+            <div class="field"><label>Total Spd %</label><input type="number" id="SPD" placeholder="0" oninput="calculate()"></div>
+            <div class="field"><label>Total Str</label><input type="number" id="S" placeholder="0" oninput="calculate()"></div>
+        </div>
     </div>
 
-    <span class="section-label">TOTAL STATS (UNBUFFED)</span>
-    <div class="input-grid">
-        <div class="input-row"><label>Total Luck</label><input type="number" id="L" oninput="calculate()"></div>
-        <div class="input-row"><label>Total Cap</label><input type="number" id="C" oninput="calculate()"></div>
-        <div class="input-row"><label>Total Spd %</label><input type="number" id="SPD" oninput="calculate()"></div>
-        <div class="input-row"><label>Total Str</label><input type="number" id="S" oninput="calculate()"></div>
-    </div>
-
-    <div class="results-panel">
-        <span style="text-align:center; font-size: 0.7rem; color: var(--success);">WEIGHTED AVERAGE EFFICIENCY</span>
-        <span id="avgScore" class="main-score">0</span>
-        <div class="sub-stat"><span>Peak (Buffed):</span> <span class="val" id="peakVal">0</span></div>
-        <div class="sub-stat"><span>Uptime:</span> <span class="val" id="uptimeVal">0%</span></div>
-        <div class="sub-stat"><span>SPS (Buffed):</span> <span class="val" id="spsVal">0.000</span></div>
+    <div class="result-card">
+        <span class="section-title" id="scoreLabel">Efficiency Score</span>
+        <span id="finalScore" class="main-result">0</span>
+        <div id="statsInfo" class="sub-result">Enter values to calculate</div>
     </div>
 </div>
 
 <script>
     const spsData = [[0,0], [250,6.031], [300,6.906], [350,6.620], [400,6.793], [450,9.119], [500,9.817], [550,9.940], [600,10.461], [650,10.267], [710,10.027], [760,9.119], [810,11.848], [860,11.943], [909,12.325], [939,12.542], [989,13.979], [1039,14.691], [1069,14.866], [1119,13.953], [1169,11.592], [1199,14.299], [1249,14.720], [1299,14.735], [1329,14.881], [1379,14.451], [1429,12.658], [1509,11.981], [1559,14.606], [1689,14.634], [1731,14.620], [1761,12.853], [1811,15.259], [1861,15.385], [1941,16.146], [1991,16.393], [2121,18.204], [2168,14.313], [2211,19.231], [2355,19.608]];
 
-    function toggleEquip(type) {
-        if(type === 'shovel') {
-            document.getElementById('checkShovel').checked = true;
-            document.getElementById('checkBoth').checked = false;
-        } else if(type === 'both') {
-            document.getElementById('checkShovel').checked = false;
-            document.getElementById('checkBoth').checked = true;
-        } else {
-            document.getElementById('checkBag').checked = !document.getElementById('checkBag').checked;
-        }
-        
-        document.getElementById('btnShovel').className = document.getElementById('checkShovel').checked ? 'toggle-btn active' : 'toggle-btn';
-        document.getElementById('btnBoth').className = document.getElementById('checkBoth').checked ? 'toggle-btn active' : 'toggle-btn';
-        document.getElementById('btnBag').className = document.getElementById('checkBag').checked ? 'toggle-btn gold' : 'toggle-btn';
+    let currentMode = 'quick';
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('modeQuick').className = mode === 'quick' ? 'mode-btn active' : 'mode-btn';
+        document.getElementById('modeFull').className = mode === 'full' ? 'mode-btn active' : 'mode-btn';
+        document.getElementById('strategyOptions').style.display = mode === 'full' ? 'block' : 'none';
+        document.getElementById('scoreLabel').innerText = mode === 'full' ? 'Weighted Average Efficiency' : 'Efficiency Score';
         calculate();
     }
 
@@ -185,45 +203,49 @@
     }
 
     function calculate() {
-        // Base inputs
-        const bL = parseFloat(document.getElementById('baseL').value) || 0;
-        const bC = parseFloat(document.getElementById('baseC').value) || 0;
-        const bSPD = parseFloat(document.getElementById('baseSPD').value) || 0;
-        const bS = parseFloat(document.getElementById('baseS').value) || 0;
-
         const uL = parseFloat(document.getElementById('L').value) || 0;
         const uC = parseFloat(document.getElementById('C').value) || 0;
         const uSPD = parseFloat(document.getElementById('SPD').value) || 0;
         const uS = parseFloat(document.getElementById('S').value) || 0;
 
-        // Peak Stats
+        const spsLow = getSPS(uSPD);
+        const lowScore = scoreFormula(uL, uC, spsLow, uS);
+
+        if (currentMode === 'quick') {
+            document.getElementById('finalScore').innerText = Math.round(lowScore).toLocaleString();
+            document.getElementById('statsInfo').innerText = `SPS: ${spsLow.toFixed(3)}`;
+            return;
+        }
+
+        // Full Mode Logic
+        const bL = parseFloat(document.getElementById('baseL').value) || 0;
+        const bC = parseFloat(document.getElementById('baseC').value) || 0;
+        const bSPD = parseFloat(document.getElementById('baseSPD').value) || 0;
+        const bS = parseFloat(document.getElementById('baseS').value) || 0;
+
         const pL = uL + bL; const pC = uC + bC; const pSPD = uSPD + bSPD; const pS = uS + bS;
+        const spsHigh = getSPS(pSPD);
+        const peakScore = scoreFormula(pL, pC, spsHigh, pS);
 
-        const peakScore = scoreFormula(pL, pC, getSPS(pSPD), pS);
-        const lowScore = scoreFormula(uL, uC, getSPS(uSPD), uS);
-
-        // Timing Logic
-        const hasBoth = document.getElementById('checkBoth').checked;
-        const hasShovel = document.getElementById('checkShovel').checked || hasBoth;
-        const hasBag = document.getElementById('checkBag').checked;
+        const hasBoth = document.getElementById('equipBoth').checked;
+        const hasShovel = document.getElementById('equipShovel').checked || hasBoth;
+        const hasBag = document.getElementById('hasBag').checked;
 
         if (!hasShovel) {
-            document.getElementById('avgScore').innerText = Math.round(lowScore).toLocaleString();
-            document.getElementById('uptimeVal').innerText = "0% (No Shovel)";
+            document.getElementById('finalScore').innerText = Math.round(lowScore).toLocaleString();
+            document.getElementById('statsInfo').innerText = "No Shovel equipped - using standard score.";
             return;
         }
 
         const buffDuration = hasBag ? 60 : 30;
         const cooldown = hasBoth ? 90 : 180;
-        const triggerTime = 20; // 10 pans estimated time
+        const triggerTime = 20; 
         const cycle = buffDuration + cooldown + triggerTime;
         
         const weightedAvg = (peakScore * buffDuration + lowScore * (cooldown + triggerTime)) / cycle;
 
-        document.getElementById('avgScore').innerText = Math.round(weightedAvg).toLocaleString();
-        document.getElementById('peakVal').innerText = Math.round(peakScore).toLocaleString();
-        document.getElementById('uptimeVal').innerText = ((buffDuration / cycle) * 100).toFixed(1) + "%";
-        document.getElementById('spsVal').innerText = getSPS(pSPD).toFixed(3);
+        document.getElementById('finalScore').innerText = Math.round(weightedAvg).toLocaleString();
+        document.getElementById('statsInfo').innerText = `Uptime: ${((buffDuration/cycle)*100).toFixed(1)}% | Peak: ${Math.round(peakScore).toLocaleString()}`;
     }
 </script>
 
